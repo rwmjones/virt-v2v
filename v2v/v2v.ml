@@ -218,8 +218,6 @@ let rec main () =
       s_"Same as ‘-ip filename’";
     [ L"print-source" ], Getopt.Set print_source,
       s_"Print source and stop";
-    [ L"qemu-boot" ], Getopt.Unit (fun () -> add_o_option "-oo" "qemu-boot"),
-      s_"Boot in qemu (-o qemu only)";
     [ L"root" ],     Getopt.String ("ask|... ", add_conv_option "--root"),
       s_"How to choose root filesystem";
     [ L"vddk-config" ], Getopt.String ("filename", set_input_option_compat "vddk-config"),

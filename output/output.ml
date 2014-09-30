@@ -1346,6 +1346,9 @@ and qemu_parse_options cmdline =
     ) cmdline.output_options;
   let qemu_boot = !qemu_boot in
 
+  if qemu_boot then
+    error (f_"-o qemu: the -oo qemu-boot option cannot be used in RHEL");
+
   (* -os must be set to a directory. *)
   let output_storage =
     match cmdline.output_storage with
