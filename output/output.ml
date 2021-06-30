@@ -75,7 +75,8 @@ let rec main () =
       error (f_"%s option used more than once on the command line") "-om";
     match mode with
     | "disk" -> output_mode := Some `Disk
-    | "glance" -> output_mode := Some `Glance
+    | "glance" ->
+       error(f_"-o glance option has been removed from RHEL 9")
     | "json" -> output_mode := Some `Json
     | "libvirt" -> output_mode := Some `Libvirt
     | "null" -> output_mode := Some `Null
