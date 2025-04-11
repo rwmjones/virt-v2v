@@ -489,7 +489,8 @@ type target_meta = {
   target_nics : target_nics
 }
 
-type root_choice = AskRoot | SingleRoot | FirstRoot | RootDev of string
+type root_choice = AskRoot | SingleRoot | FirstRoot | AllRoots
+                   | RootDev of string list
 
 let default_root_choice = AskRoot
 
@@ -497,7 +498,10 @@ let set_root_choice root_choice = function
   | "ask" -> root_choice := AskRoot
   | "single" -> root_choice := SingleRoot
   | "first" -> root_choice := FirstRoot
-  | dev when String.is_prefix dev "/dev/" -> root_choice := RootDev dev
+  | "all" -> root_choice := AllRoots
+  | dev when String.is_prefix dev "/dev/" ->
+     let devs = String.nsplit "," dev in
+     root_choice := RootDev devs
   | s -> error (f_"unknown --root option: %s") s
 
 type output_allocation = Sparse | Preallocated

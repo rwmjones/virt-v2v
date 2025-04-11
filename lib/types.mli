@@ -377,7 +377,8 @@ type root_choice =
   | AskRoot                     (** Ask the user interactively (default) *)
   | SingleRoot                  (** Fail if multi-boot *)
   | FirstRoot                   (** First from list returned by libguestfs *)
-  | RootDev of string           (** Named device *)
+  | AllRoots                    (** All roots that we find (experimental) *)
+  | RootDev of string list      (** Named device(s) *)
 (** Type of [--root] (root choice) option. *)
 
 val default_root_choice : root_choice

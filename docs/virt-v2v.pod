@@ -856,6 +856,17 @@ would mean to use the second partition on the first hard drive.  If
 the named root device does not exist or was not detected as a root
 device, then virt-v2v will fail.
 
+=item B<--root all>
+
+=item B<--root /dev/>...B<,/dev/>...[B<,>...]
+
+(virt-v2v E<ge> 2.8, experimental)
+
+If virt-v2v finds a multi-boot operating system, ask it to try
+converting all roots found.  If a comma-separated list of root devices
+is given, then convert those root devices.  This is experimental and
+may not result in a successful conversion or a bootable guest.
+
 =item B<-v>
 
 =item B<--verbose>

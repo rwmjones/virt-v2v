@@ -20,14 +20,14 @@
 
     This handles the [--root] command line option. *)
 
-val choose_root : Types.root_choice -> Guestfs.guestfs -> string
+val choose_root : Types.root_choice -> Guestfs.guestfs -> string list
 (** Do libguestfs inspection on the guest.
 
     Before calling this, the disks must be added to the handle
     and the handle must be launched.
 
     Depending on the contents of [root_choice] (the [--root] command
-    line option) choose which root device to convert.  A single
-    root device is returned.
+    line option) choose which root device(s) to convert.  The
+    non-empty list of root device(s) is returned.
 
     Note that this function may be interactive ([--root ask]). *)

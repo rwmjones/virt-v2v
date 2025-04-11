@@ -38,7 +38,7 @@ let choose_root root_choice g =
                on a source which is supported (and not, for example, \
                a blank disk), then this should not happen.\n\n\
                No root device found in this operating system image.");
-  | [root] -> root (* only one root, so return it *)
+  | [root] -> [root] (* only one root, so return it *)
   | roots ->
      (* If there are multiple roots, use the [--root] option supplied
       * by the user to help us choose what we should do next.
@@ -73,7 +73,7 @@ let choose_root root_choice g =
             | Failure _ -> ()
           )
         done;
-        List.nth roots (!i - 1)
+        [List.nth roots (!i - 1)]
 
       | SingleRoot ->
         error (f_"multi-boot operating systems are not supported by \
@@ -83,13 +83,19 @@ let choose_root root_choice g =
       | FirstRoot ->
         let root = List.hd roots in
         info (f_"Picked %s because '--root first' was used.") root;
-        root
+        [root]
 
-      | RootDev dev ->
-        let root =
-          if List.mem dev roots then dev
-          else
-            error (f_"root device %s not found.  Roots found were: %s")
-              dev (String.concat " " roots) in
-        info (f_"Picked %s because '--root %s' was used.") root dev;
-        root
+      | AllRoots ->
+        roots
+
+      | RootDev devs ->
+        (* Each device must be in the list of roots we found. *)
+        List.iter (
+          fun dev ->
+            if not (List.mem dev roots) then
+              error (f_"root device %s not found.  Roots found were: %s")
+                dev (String.concat " " roots)
+        ) devs;
+
+        (* And we can just return them since we know they are roots. *)
+        devs

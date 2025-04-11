@@ -85,28 +85,35 @@ let rec convert dir options source =
 
   (* Inspect the source, choose root and mount up the filesystems. *)
   message (f_"Inspecting the source");
-  let root = Choose_root.choose_root options.root_choice g in
-  let inspect = Mount_filesystems.mount_filesystems g root in
+  let roots = Choose_root.choose_root options.root_choice g in
+  assert (roots <> []);
+  let multi_root_conversion = List.length roots > 1 in
+  List.iter (
+    fun root ->
+      let inspect = Mount_filesystems.mount_filesystems g root in
 
-  let mpstats = get_mpstats g in
-  check_guest_free_space inspect mpstats;
+      let mpstats = get_mpstats g in
+      check_guest_free_space inspect mpstats;
 
-  (* Conversion. *)
-  let guestcaps =
-    do_convert g source inspect i_firmware
-      options.block_driver options.keep_serial_console options.static_ips in
+      (* Conversion. *)
+      let guestcaps =
+        do_convert g source inspect i_firmware
+          multi_root_conversion
+          options.block_driver options.keep_serial_console
+          options.static_ips in
 
-  (* Run virt-customize options. *)
-  Customize_run.run g inspect.i_root options.customize_ops;
+      (* Run virt-customize options. *)
+      Customize_run.run g inspect.i_root options.customize_ops;
 
-  g#umount_all ();
+      g#umount_all ();
 
-  (* Doing fstrim on all the filesystems reduces the transfer size
-   * because unused blocks are marked in the overlay and thus do
-   * not have to be copied.
-   *)
-  message (f_"Mapping filesystem data to avoid copying unused and blank areas");
-  do_fstrim g inspect;
+      (* Doing fstrim on all the filesystems reduces the transfer size
+       * because unused blocks are marked in the overlay and thus do
+       * not have to be copied.
+       *)
+      message (f_"Mapping filesystem data to avoid copying unused and blank areas");
+      do_fstrim g inspect;
+  ) roots;
 
   message (f_"Closing the overlay");
   g#umount_all ();
@@ -223,6 +230,7 @@ and do_fstrim g inspect =
 
 (* Conversion. *)
 and do_convert g source inspect i_firmware
+               multi_root_conversion
                block_driver keep_serial_console interfaces =
   (* Create the "Converting..." message.  Complicated! *)
   let () =
@@ -233,7 +241,11 @@ and do_convert g source inspect i_firmware
       | prod, "unknown" -> prod
       | prod, osinfo -> sprintf "%s (%s)" prod osinfo in
 
-    message (f_"Converting %s to run on KVM") what_guest in
+    let root_display =
+      if not multi_root_conversion then ""
+      else sprintf " [%s]" inspect.i_root in
+
+    message (f_"Converting %s%s to run on KVM") what_guest root_display in
 
   let convert, conversion_name =
     match inspect with
